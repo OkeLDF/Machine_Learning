@@ -95,36 +95,37 @@ def _print_histogram(t):
         print("        %s: %s" % (str(k), str(d[k])))
     print()
 
-def _knn_classify(dados, target_inst, target_coln, target_classname='x', k=3):
+def _knn_classify(newdata, dataset, target_coln, k=7):
     dists=[]
-    for inst in dados:
-        if inst is target_inst: continue
-        if inst[target_coln] == target_classname: continue
-        distance = _dist(inst, target_inst)
+    for inst in dataset:
+        distance = _dist(inst, newdata)
         dists.append((distance, inst[target_coln]))
     
     dists.sort()
-    ngb=[]
-    for e in dists[:k]: ngb.append(e[1])
-    _print_histogram(ngb)
-    return _mostfrequent(ngb)
+    neighbors=[]
+    for e in dists[:k]: neighbors.append(e[1])
+    _print_histogram(neighbors)
+    return _mostfrequent(neighbors)
 
 'PLOTAGEM DOS DADOS:'
-def showdata(database, x_coln:int, y_coln:int, class_coln:int, target_classname='x', header_first=True):
+def showdata(dataset, x_coln:int, y_coln:int, class_coln:int, newdata=[], has_header=True):
     markers = ['s', '^', 'p', 'D', 'h']
     colors = ['red', 'blue', 'lime', 'purple', 'orange']
     i=0
     d = {}
     plt.clf()
 
-    if header_first:
-        plt.xlabel(database[0][x_coln])
-        plt.ylabel(database[0][y_coln])
-        db = database[1:]
-    else: db = database
+    if has_header:
+        plt.xlabel(dataset[0][x_coln])
+        plt.ylabel(dataset[0][y_coln])
+        db = dataset[1:]
+    else: db = dataset
+
+    if newdata != []:
+        db.append(list(newdata)+['_newdata'])
 
     for inst in db:
-        if inst[class_coln] == target_classname:
+        if inst[class_coln] == '_newdata':
             plt.scatter(inst[x_coln], inst[y_coln], marker='x', color='black')
             continue
 
@@ -136,8 +137,9 @@ def showdata(database, x_coln:int, y_coln:int, class_coln:int, target_classname=
     plt.grid(True)
     plt.show()
 
-'FUNÇÃO "INTERFACE":'
-def classify(database:list, target_coln:int, target_classname='x', k=7, header_first=True):
+'FUNÇÃO DE CLASSIFICAÇÃO:'
+
+def classify(newdata, dataset:list, target_coln:int, k=7, has_header=True):
     '''
     Dada a base de dados 'database', o algoritmo irá classificar
     todas as instâncias cuja classe (identificada pelo número
@@ -154,15 +156,15 @@ def classify(database:list, target_coln:int, target_classname='x', k=7, header_f
     
     i=0
     adder=0
-    if header_first:
-        db = database[1:]
+    if has_header:
+        db = dataset[1:]
         adder=1
-
-    classified=[]
     
     print('\nKNN (K = %i) Classification Results:' % (k))
 
-    for inst in db:
+    classified = _knn_classify(newdata, db, target_coln=target_coln, k=k)
+    print("    instance classified as '%s'" % (classified))
+    '''for inst in db:
         if inst[target_coln] == target_classname:
             print('\n    instance %i:' % (i+adder))
             classified.append([i, _knn_classify(db, inst, target_coln=target_coln, target_classname=target_classname, k=k)])
@@ -170,6 +172,5 @@ def classify(database:list, target_coln:int, target_classname='x', k=7, header_f
     
     for c in classified:
         print("    instance %i classified as '%s'" % (c[0]+adder, c[1]))
-        db[c[0]][target_coln] = c[1]
+        db[c[0]][target_coln] = c[1]'''
     
-    return
