@@ -19,7 +19,7 @@ def _numof_digits(x:int, base=10):
         break
     return n
         
-def get_data(filename:str, header_first=True, sep=','): # testar função!!! 
+def get_data(filename:str, header_first=True, sep=','):
     t = []
     fp = open(filename, 'r')
     i=0
@@ -45,7 +45,6 @@ def get_data(filename:str, header_first=True, sep=','): # testar função!!!
             else:
                 t[i].append(at)
         i+=1
-        # t.append([float(div[0]), float(div[1]), div[2].strip()])
     return t
 
 def printdb(db, verbose=False):
@@ -95,18 +94,6 @@ def _print_histogram(t):
         print("        %s: %s" % (str(k), str(d[k])))
     print()
 
-def _knn_classify(newdata, dataset, target_coln, k=7):
-    dists=[]
-    for inst in dataset:
-        distance = _dist(inst, newdata)
-        dists.append((distance, inst[target_coln]))
-    
-    dists.sort()
-    neighbors=[]
-    for e in dists[:k]: neighbors.append(e[1])
-    _print_histogram(neighbors)
-    return _mostfrequent(neighbors)
-
 'PLOTAGEM DOS DADOS:'
 def showdata(dataset, x_coln:int, y_coln:int, class_coln:int, newdata=[], has_header=True):
     markers = ['s', '^', 'p', 'D', 'h']
@@ -122,13 +109,9 @@ def showdata(dataset, x_coln:int, y_coln:int, class_coln:int, newdata=[], has_he
     else: db = dataset
 
     if newdata != []:
-        db.append(list(newdata)+['_newdata'])
+        plt.scatter(newdata[x_coln], newdata[y_coln], marker='x', color='black')
 
     for inst in db:
-        if inst[class_coln] == '_newdata':
-            plt.scatter(inst[x_coln], inst[y_coln], marker='x', color='black')
-            continue
-
         if inst[class_coln] not in d:
             d[inst[class_coln]] = [markers[i], colors[i]]
             i+=1
@@ -153,24 +136,21 @@ def classify(newdata, dataset:list, target_coln:int, k=7, has_header=True):
     '''
     k = abs(k)
     if k%2==0: k+=1
-    
-    i=0
-    adder=0
     if has_header:
         db = dataset[1:]
-        adder=1
     
     print('\nKNN (K = %i) Classification Results:' % (k))
 
-    classified = _knn_classify(newdata, db, target_coln=target_coln, k=k)
-    print("    instance classified as '%s'" % (classified))
-    '''for inst in db:
-        if inst[target_coln] == target_classname:
-            print('\n    instance %i:' % (i+adder))
-            classified.append([i, _knn_classify(db, inst, target_coln=target_coln, target_classname=target_classname, k=k)])
-        i+=1
+    dists=[]
+    for inst in db:
+        distance = _dist(inst, newdata)
+        dists.append((distance, inst[target_coln]))
     
-    for c in classified:
-        print("    instance %i classified as '%s'" % (c[0]+adder, c[1]))
-        db[c[0]][target_coln] = c[1]'''
-    
+    dists.sort()
+    neighbors=[]
+    for e in dists[:k]: neighbors.append(e[1])
+    _print_histogram(neighbors)
+    newdata_class = _mostfrequent(neighbors)
+
+    print("    instance classified as '%s'" % (newdata_class))
+    return newdata_class
