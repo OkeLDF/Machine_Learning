@@ -17,31 +17,31 @@ class LinearRegression:
     coefs = np.array([])
     metrics = {}
 
-    def _to_np_array(self, array):
-        return np.array(array)
+    def _add_bias(self, X_np):
+        return np.c_[np.ones(X_np.shape), X_np]
     
-    def _add_bias(self, X_data):
-        return np.c_[np.ones(X_data.shape), X_data]
-
-    def fit(self, X, y) -> None:
-        X_data = self._to_np_array(X)
-        y_data = self._to_np_array(y)
-        X_bias = self._add_bias(X_data)
-
-        self.coefs = np.linalg.pinv(X_bias).dot(y_data) 
-        y_pred = X_bias.dot(self.coefs)
-
-        self.metrics['mse'] = np.square(y_data - y_pred).mean()
+    def _calculate_metrics(self, y_np, y_pred):
+        self.metrics['mse'] = np.square(y_np - y_pred).mean()
         self.metrics['rmse'] = np.sqrt(self.metrics['mse'])
-        self.metrics['mae'] = (np.abs(y_data - y_pred)).mean()
+        self.metrics['mae'] = (np.abs(y_np - y_pred)).mean()
         self.metrics['r2'] = 1 - np.divide(
-            np.square(y_data-y_pred).mean(),
-            np.square(y_data-y_data.mean()).mean()
+            np.square(y_np - y_pred).mean(),
+            np.square(y_np - y_np.mean()).mean()
         )
 
+    def fit(self, X, y) -> None:
+        X_np = np.array(X)
+        y_np = np.array(y)
+        X_bias = self._add_bias(X_np)
+
+        self.coefs = np.linalg.pinv(X_bias).dot(y_np) 
+
+        y_pred = X_bias.dot(self.coefs)
+        self._calculate_metrics(y_np, y_pred)
+
     def predict(self, X) -> np.ndarray:
-        X_data = self._to_np_array(X)
-        X_bias = self._add_bias(X_data)
+        X_np = np.array(X)
+        X_bias = self._add_bias(X_np)
         y_pred = X_bias.dot(self.coefs)
         return y_pred
 
