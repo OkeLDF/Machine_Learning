@@ -2,6 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 class LinearRegression:
+    '''
+        #### Attributes:
+        
+        - `coefs`: NumPy array containing the coefficients calculated by the model
+
+        - `metrics`: Python dictionary containing model evaluation metrics
+            - `metrics['mse']`: gets the mean squared error
+            - `metrics['rmse']`: gets the root mean squared error
+            - `metrics['mae']`: gets the mean absolute error
+            - `metrics['r2']`: gets the r2 score
+    '''
+
     coefs = np.array([])
     metrics = {}
 
@@ -11,7 +23,7 @@ class LinearRegression:
     def _add_bias(self, X_data):
         return np.c_[np.ones(X_data.shape), X_data]
 
-    def fit(self, X, y):
+    def fit(self, X, y) -> None:
         X_data = self._to_np_array(X)
         y_data = self._to_np_array(y)
         X_bias = self._add_bias(X_data)
@@ -27,7 +39,7 @@ class LinearRegression:
             np.square(y_data-y_data.mean()).mean()
         )
 
-    def predict(self, X):
+    def predict(self, X) -> np.ndarray:
         X_data = self._to_np_array(X)
         X_bias = self._add_bias(X_data)
         y_pred = X_bias.dot(self.coefs)
