@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class LinearRegression:
     '''
@@ -14,8 +13,12 @@ class LinearRegression:
             - `metrics['r2']`: gets the r2 score
     '''
 
-    coefs = np.array([])
+    coefs = None
     metrics = {}
+    _is_fitted = None
+
+    def __init__(self):
+        self._is_fitted = False
 
     def _add_bias(self, X_np):
         return np.c_[np.ones(X_np.shape), X_np]
@@ -38,41 +41,13 @@ class LinearRegression:
 
         y_pred = X_bias.dot(self.coefs)
         self._calculate_metrics(y_np, y_pred)
+        self._is_fitted = True
 
     def predict(self, X) -> np.ndarray:
+        if not self._is_fitted:
+            raise Exception('LinearRegression must be fitted before making predictions')
+        
         X_np = np.array(X)
         X_bias = self._add_bias(X_np)
         y_pred = X_bias.dot(self.coefs)
         return y_pred
-
-if __name__ == '__main__':
-    def define_data(n=100, m=1, coefs=[4,3], X_range=20, outlier_factor=10):
-        X = X_range * np.random.rand(n, m)
-        y = coefs[0] + coefs[1] * X + outlier_factor * np.random.rand(n, m)
-        return X, y
-    
-    def run_linreg(X, y):
-        linreg = LinearRegression()
-        linreg.fit(X, y)
-
-        print('coefs   :\n  ', linreg.coefs[0], ',', linreg.coefs[1], '\n')
-        print('metrics :\n  ', linreg.metrics)
-
-        return linreg
-
-    def run_test_plot(X, y, linreg):
-        X_new = np.array([
-            [np.min(X)],
-            [np.max(X)]
-        ])
-
-        y_pred = linreg.predict(X_new)
-
-        if X.shape[1] == 1:
-            plt.scatter(X, y)
-            plt.plot(X_new, y_pred, 'r-')
-            plt.show()
-
-    X, y = define_data()
-    linreg = run_linreg(X, y)
-    run_test_plot(X, y, linreg)
